@@ -6,4 +6,13 @@ export const Wrapper = styled.main`
   grid-column-gap: 1.5rem;
 
   padding: 1.5rem;
+
+  section {
+    h2 {
+      height: 2.5rem;
+
+      font-size: 1rem;
+      font-weight: normal;
+    }
+  }
 `;
