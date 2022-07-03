@@ -1,16 +1,37 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AppHeader } from "../AppHeader/AppHeader";
 import { AppContainer } from "../AppContainer";
-import { Checkbox } from "../Shared/Checkbox";
-
 import { Container, Wrapper } from "./App.styles";
 import { LineChart } from "../Shared/LineChart";
+import { ShoppingList } from "../ShoppingList";
+
+import productsMock from "../../mocks/products.json";
+import { ProductType } from "../../mocks/productsType";
 
 const COLORS = ["#62CBC6", "#00ABAD", "#00858C", "#006073", "#004D61"];
 
 export const App: React.FC = () => {
-  const [lettuceChecked, isLettuceChecked] = useState(false);
-  const [riceChecked, isRiceChecked] = useState(false);
+  const [products, setProducts] = useState<Array<ProductType>>(
+    productsMock.products
+  );
+  const [selectedProducts, setSelectedProducts] = useState<Array<ProductType>>(
+    []
+  );
+
+  useEffect(() => {
+    const newSelectedProducts = products.filter((product) => product.checked);
+    setSelectedProducts(newSelectedProducts);
+  }, [products]);
+
+  const handleToggle = (id: string, checked: boolean) => {
+    const newProducts = products.map((product) => {
+      return product.id === id
+        ? { ...product, checked: !product.checked }
+        : product;
+    });
+
+    setProducts(newProducts);
+  };
 
   return (
     <Wrapper>
@@ -19,29 +40,18 @@ export const App: React.FC = () => {
 
         <AppContainer
           left={
-            <section>
-              <h2>Produtos disponíveis:</h2>
-              <Checkbox
-                checked={lettuceChecked}
-                title="Alface"
-                onClick={() => isLettuceChecked((prev) => !prev)}
-              />
-              <Checkbox
-                checked={riceChecked}
-                title="Arroz"
-                onClick={() => isRiceChecked((prev) => !prev)}
-              />
-            </section>
+            <ShoppingList
+              title="Produtos disponíveis"
+              products={products}
+              onToggle={handleToggle}
+            />
           }
           middle={
-            <section>
-              <h2>Sua lista de compras:</h2>
-              <Checkbox
-                checked={riceChecked}
-                title="Arroz"
-                onClick={() => isRiceChecked((prev) => !prev)}
-              />
-            </section>
+            <ShoppingList
+              title="Sua lista de compras"
+              products={selectedProducts}
+              onToggle={handleToggle}
+            />
           }
           right={
             <section>
