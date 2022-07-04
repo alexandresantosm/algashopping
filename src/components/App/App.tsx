@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { AppHeader } from "../AppHeader/AppHeader";
+import { AppHeader } from "../AppHeader";
 import { AppContainer } from "../AppContainer";
 import { Container, Wrapper } from "./App.styles";
 import { LineChart } from "../Shared/LineChart";
@@ -7,6 +7,8 @@ import { ShoppingList } from "../ShoppingList";
 
 import productsMock from "../../mocks/products.json";
 import { ProductType } from "../../mocks/productsType";
+import { extractPercentage } from "../../utils/extractPercentage";
+import { PriceProducts } from "../PriceProducts";
 
 const COLORS = ["#62CBC6", "#00ABAD", "#00858C", "#006073", "#004D61"];
 
@@ -17,11 +19,25 @@ export const App: React.FC = () => {
   const [selectedProducts, setSelectedProducts] = useState<Array<ProductType>>(
     []
   );
+  const [totalPrice, setTotalPrice] = useState(0);
 
   useEffect(() => {
     const newSelectedProducts = products.filter((product) => product.checked);
     setSelectedProducts(newSelectedProducts);
   }, [products]);
+
+  useEffect(() => {
+    const getTotalPrice = (total: number, product: ProductType) => {
+      return total + product.price;
+    };
+
+    const totalPriceSelectedProducts = selectedProducts.reduce(
+      getTotalPrice,
+      0
+    );
+
+    setTotalPrice(totalPriceSelectedProducts);
+  }, [selectedProducts]);
 
   const handleToggle = (id: string, checked: boolean) => {
     const newProducts = products.map((product) => {
@@ -58,24 +74,46 @@ export const App: React.FC = () => {
               <h2>Estatística:</h2>
               <LineChart
                 title="Saudável"
-                percentage={80}
+                percentage={extractPercentage(
+                  selectedProducts.length,
+                  selectedProducts.filter((product) =>
+                    product.tags.includes("healthy")
+                  ).length
+                )}
                 progressColor={COLORS[0]}
               />
               <LineChart
                 title="Não tão saudável assim"
-                percentage={20}
+                percentage={extractPercentage(
+                  selectedProducts.length,
+                  selectedProducts.filter((product) =>
+                    product.tags.includes("junk")
+                  ).length
+                )}
                 progressColor={COLORS[1]}
               />
               <LineChart
                 title="Limpeza"
-                percentage={35}
+                percentage={extractPercentage(
+                  selectedProducts.length,
+                  selectedProducts.filter((product) =>
+                    product.tags.includes("cleaning")
+                  ).length
+                )}
                 progressColor={COLORS[2]}
               />
               <LineChart
                 title="Outros"
-                percentage={15}
+                percentage={extractPercentage(
+                  selectedProducts.length,
+                  selectedProducts.filter((product) =>
+                    product.tags.includes("others")
+                  ).length
+                )}
                 progressColor={COLORS[3]}
               />
+
+              <PriceProducts price={totalPrice} />
             </section>
           }
         />

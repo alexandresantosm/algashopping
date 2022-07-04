@@ -1,0 +1,1 @@
+export { PriceProducts } from "./PriceProducts";
