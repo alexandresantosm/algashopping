@@ -1,22 +1,29 @@
 import React from "react";
+import { useSelector } from "react-redux";
 
 import { Checkbox } from "../Shared/Checkbox";
 
-import { ProductType } from "../../mocks/productsType";
+import { selectAllProducts, selectSelectedProducts } from "../../store/Products/Products.selectors";
 
 import { ProductList, Title, Wrapper } from "./ShoppingList.styles";
 
 interface ShoppingListProps {
   title: string;
-  products: Array<ProductType>;
-  onToggle: (id: string, checked: boolean) => void;
+  displayOnlySelected?: boolean;
+  onToggle: (id: string) => void;
 }
 
 export const ShoppingList: React.FC<ShoppingListProps> = ({
   title,
-  products,
+  displayOnlySelected,
   onToggle,
 }) => {
+  const products = useSelector(
+    displayOnlySelected
+    ? selectSelectedProducts
+    : selectAllProducts
+  );
+  
   return (
     <Wrapper>
       <Title>{title}:</Title>
@@ -27,7 +34,7 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({
             key={product.id}
             title={product.name}
             checked={product.checked}
-            onClick={() => onToggle(product.id, product.checked)}
+            onClick={() => onToggle(product.id)}
           />
         ))}
       </ProductList>
