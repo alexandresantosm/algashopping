@@ -1,52 +1,27 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { useDispatch, useSelector } from "react-redux";
+
 import { AppHeader } from "../AppHeader";
 import { AppContainer } from "../AppContainer";
 import { Container, Wrapper } from "./App.styles";
 import { LineChart } from "../Shared/LineChart";
 import { ShoppingList } from "../ShoppingList";
-
-import productsMock from "../../mocks/products.json";
-import { ProductType } from "../../mocks/productsType";
-import { extractPercentage } from "../../utils/extractPercentage";
 import { PriceProducts } from "../PriceProducts";
+
+import {
+  selectSelectedProductsTotalPrice
+} from "../../store/Products/Products.selectors";
+import { toggleProduct } from "../../store/Products/Products.actions";
 
 const COLORS = ["#62CBC6", "#00ABAD", "#00858C", "#006073", "#004D61"];
 
 export const App: React.FC = () => {
-  const [products, setProducts] = useState<Array<ProductType>>(
-    productsMock.products
-  );
-  const [selectedProducts, setSelectedProducts] = useState<Array<ProductType>>(
-    []
-  );
-  const [totalPrice, setTotalPrice] = useState(0);
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    const newSelectedProducts = products.filter((product) => product.checked);
-    setSelectedProducts(newSelectedProducts);
-  }, [products]);
+  const totalPrice = useSelector(selectSelectedProductsTotalPrice);
 
-  useEffect(() => {
-    const getTotalPrice = (total: number, product: ProductType) => {
-      return total + product.price;
-    };
-
-    const totalPriceSelectedProducts = selectedProducts.reduce(
-      getTotalPrice,
-      0
-    );
-
-    setTotalPrice(totalPriceSelectedProducts);
-  }, [selectedProducts]);
-
-  const handleToggle = (id: string, checked: boolean) => {
-    const newProducts = products.map((product) => {
-      return product.id === id
-        ? { ...product, checked: !product.checked }
-        : product;
-    });
-
-    setProducts(newProducts);
+  const handleToggle = (id: string) => {
+    dispatch(toggleProduct(id));
   };
 
   return (
@@ -58,58 +33,43 @@ export const App: React.FC = () => {
           left={
             <ShoppingList
               title="Produtos disponíveis"
-              products={products}
               onToggle={handleToggle}
             />
           }
+
           middle={
             <ShoppingList
               title="Sua lista de compras"
-              products={selectedProducts}
+              displayOnlySelected={true}
               onToggle={handleToggle}
             />
           }
+
           right={
             <section>
               <h2>Estatística:</h2>
+
               <LineChart
                 title="Saudável"
-                percentage={extractPercentage(
-                  selectedProducts.length,
-                  selectedProducts.filter((product) =>
-                    product.tags.includes("healthy")
-                  ).length
-                )}
+                tag="healthy"
                 progressColor={COLORS[0]}
               />
+
               <LineChart
                 title="Não tão saudável assim"
-                percentage={extractPercentage(
-                  selectedProducts.length,
-                  selectedProducts.filter((product) =>
-                    product.tags.includes("junk")
-                  ).length
-                )}
+                tag="junk"
                 progressColor={COLORS[1]}
               />
+
               <LineChart
                 title="Limpeza"
-                percentage={extractPercentage(
-                  selectedProducts.length,
-                  selectedProducts.filter((product) =>
-                    product.tags.includes("cleaning")
-                  ).length
-                )}
+                tag="cleaning"
                 progressColor={COLORS[2]}
               />
+
               <LineChart
                 title="Outros"
-                percentage={extractPercentage(
-                  selectedProducts.length,
-                  selectedProducts.filter((product) =>
-                    product.tags.includes("others")
-                  ).length
-                )}
+                tag="others"
                 progressColor={COLORS[3]}
               />
 
